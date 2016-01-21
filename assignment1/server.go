@@ -82,8 +82,8 @@ func handleWrite(tokens []string,reader *bufio.Reader, conn net.Conn){
 	}
 	b1,_ := reader.ReadByte()
 	b2,_ := reader.ReadByte()
+	mlock.Lock()		
 	if b1 == '\r' && b2 == '\n' {
-		mlock.Lock()	
 		f,status := m[tokens[1]]
 		f.contents = barr
 		f.starttime = time.Now()
@@ -99,13 +99,12 @@ func handleWrite(tokens []string,reader *bufio.Reader, conn net.Conn){
 			f.vno = 1
 			m[tokens[1]] = f
 		}
-		s = fmt.Sprintf("OK %v\r\n",m[tokens[1]].vno)
-		mlock.Unlock()
-
+		s = fmt.Sprintf("OK %v\r\n",m[tokens[1]].vno)	
 	}else{
 		s = fmt.Sprintf("ERR_CMD_ERR\r\n")
 	}
 	conn.Write([]byte(s))
+	mlock.Unlock()	
 }
 
 func handleRead(tokens []string, conn net.Conn){
@@ -118,12 +117,9 @@ func handleRead(tokens []string, conn net.Conn){
 		conn.Write(f.contents)
 		conn.Write([]byte("\r\n"))
 	}else{
-			if !status {
-				s := fmt.Sprintf("ERR_FILE_NOT_FOUND\r\n")
-				conn.Write([]byte(s))
-			}else{
-				delete(m,tokens[1])
-			}
+		s := fmt.Sprintf("ERR_FILE_NOT_FOUND\r\n")
+		conn.Write([]byte(s))
+		delete(m,tokens[1])
 	}
 	mlock.Unlock()
 }
@@ -148,8 +144,8 @@ func handleCas(tokens []string,reader *bufio.Reader, conn net.Conn){
 	}
 	b1,_ := reader.ReadByte()
 	b2,_ := reader.ReadByte()
+	mlock.Lock()
 	if b1 == '\r' && b2 == '\n' {
-		mlock.Lock()
 		f,status := m[tokens[1]]
 		temp := int64((time.Now().Sub(f.starttime)).Seconds())
 		if status && (f.exptime == -1 || temp < f.exptime){
@@ -175,11 +171,11 @@ func handleCas(tokens []string,reader *bufio.Reader, conn net.Conn){
 					delete(m,tokens[1])
 				}
 		}
-		mlock.Unlock()
 	}else{
 		s = fmt.Sprintf("ERR_CMD_ERR\r\n")
 	}
 	conn.Write([]byte(s))
+	mlock.Unlock()
 }
 
 func handleDelete(tokens []string,conn net.Conn){
