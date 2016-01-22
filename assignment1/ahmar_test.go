@@ -90,7 +90,6 @@ func TestTCPSimple(t *testing.T) {
                 t.Error(err.Error()) // report error through testing framework
         }
         scanner := bufio.NewScanner(conn)
-
         // Write a file
         _,err = fmt.Fprintf(conn, "write %v %v %v\r\n%v\r\n", name, len(contents), exptime ,contents)
         if err !=nil {
