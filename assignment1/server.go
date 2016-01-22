@@ -153,7 +153,7 @@ func handleCas(tokens []string,reader *bufio.Reader, conn net.Conn){
 			if f.vno == version {
 				f.contents = barr
 				f.starttime = time.Now()
-				if len(tokens)<4{
+				if len(tokens)<5{
 					f.exptime = -1
 				}else{
 					f.exptime,_ = strconv.ParseInt(tokens[4],10,64)
@@ -162,7 +162,7 @@ func handleCas(tokens []string,reader *bufio.Reader, conn net.Conn){
 				s = fmt.Sprintf("OK %v\r\n",f.vno)
 				m[tokens[1]] = f
 			}else{
-				s = fmt.Sprintf("ERR_VERSION %v\r\n",version)
+				s = fmt.Sprintf("ERR_VERSION %v\r\n",f.vno)
 			}
 		}else{
 				if !status {
