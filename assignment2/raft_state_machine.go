@@ -71,6 +71,7 @@ type Error struct {
 	errortype string // Can be of the following types:
 					 // 1. ERR_GOTO_LEADER
 					 // 2. ERR_WAIT_FOR_ELECTION
+					 // 3. ""(if no error)
 }
 
 type logEntry struct {
