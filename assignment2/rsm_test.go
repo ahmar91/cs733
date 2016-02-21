@@ -4,7 +4,6 @@ import (
 	"testing"
 	"fmt"
 	"strconv"
-	//"math/rand"
 )
 
 func TestAppend(t *testing.T){
@@ -20,9 +19,7 @@ func TestAppend(t *testing.T){
 	for i := 0;i<len(sm.serverIds);i++{
 		sm.nextIndex[sm.serverIds[i]] = 1
 	}
-//	fmt.Println("hello")
 	z := sm.ProcessEvent(Append{data:[]byte{'m','o','v'}})
-//	fmt.Println("world")
 	var numSend int
 	var numLogStore int
 	var incorrectAction int
@@ -36,10 +33,6 @@ func TestAppend(t *testing.T){
 			incorrectAction++
 		}
 	}
-	// fmt.Println("num of sends: " + strconv.Itoa(numSend))
-	// fmt.Println("num of log stores " + strconv.Itoa(numLogStore))
-	// fmt.Println("num of incorrect actions " + strconv.Itoa(incorrectAction))
-//	x := strconv.Itoa(numSend)
 	expect(t,strconv.Itoa(numSend),strconv.Itoa(len(sm.serverIds)))
 	expect(t,strconv.Itoa(numLogStore),"1")
 	expect(t,strconv.Itoa(incorrectAction),"0")
@@ -90,12 +83,6 @@ func TestTimeout(t *testing.T){
 			incorrectAction++
 		}
 	}
-	// fmt.Println("num of sends: " + strconv.Itoa(numSend))
-	// fmt.Println("num of log stores " + strconv.Itoa(numLogStore))
-	// fmt.Println("num of alarms " + strconv.Itoa(numAlarm))
-	// fmt.Println("num of state stores " + strconv.Itoa(numStateStore))
-	// fmt.Println("num of commits " + strconv.Itoa(numCommit))
-	// fmt.Println("num of incorrect actions " + strconv.Itoa(incorrectAction))
 	expect(t,strconv.Itoa(numSend),"4")
 	expect(t,strconv.Itoa(numLogStore),"0")
 	expect(t,strconv.Itoa(numAlarm),"1")
@@ -158,12 +145,6 @@ func TestAppendEntriesReq(t *testing.T){
 			incorrectAction++
 		}
 	}
-	// fmt.Println("num of sends: " + strconv.Itoa(numSend))
-	// fmt.Println("num of log stores " + strconv.Itoa(numLogStore))
-	// fmt.Println("num of alarms " + strconv.Itoa(numAlarm))
-	// fmt.Println("num of state stores " + strconv.Itoa(numStateStore))
-	// fmt.Println("num of commits " + strconv.Itoa(numCommit))
-	// fmt.Println("num of incorrect actions " + strconv.Itoa(incorrectAction))
 	expect(t,strconv.Itoa(numSend),"1")
 	expect(t,strconv.Itoa(numLogStore),"2")
 	expect(t,strconv.Itoa(numAlarm),"1")
@@ -222,12 +203,6 @@ func TestAppendEntriesResp(t *testing.T){
 			incorrectAction++
 		}
 	}
-	// fmt.Println("num of sends: " + strconv.Itoa(numSend))
-	// fmt.Println("num of log stores " + strconv.Itoa(numLogStore))
-	// fmt.Println("num of alarms " + strconv.Itoa(numAlarm))
-	// fmt.Println("num of state stores " + strconv.Itoa(numStateStore))
-	// fmt.Println("num of commits " + strconv.Itoa(numCommit))
-	// fmt.Println("num of incorrect actions " + strconv.Itoa(incorrectAction))
 	expect(t,strconv.Itoa(numSend),"1")
 	expect(t,strconv.Itoa(numLogStore),"0")
 	expect(t,strconv.Itoa(numAlarm),"0")
@@ -236,6 +211,122 @@ func TestAppendEntriesResp(t *testing.T){
 	expect(t,strconv.Itoa(incorrectAction),"0")		
 }
 
+func TestVoteReq(t *testing.T){
+	var sm StateMachine
+	sm = StateMachine{currTerm: 2,serverIds: []int{5,13,21,55},selfid:34,timer:1000,currState:"follower"}
+	sm.clusterSize = len(sm.serverIds)+1
+	sm.log = make([]logEntry,20)
+	for i := 0;i<len(sm.log);i++{
+		sm.log[i].term = i+1
+		sm.log[i].command = []byte{'j','m','p'}
+	}
+	sm.lastLogIndex = 19
+	sm.lastLogTerm = 4
+	sm.votedFor = -1
+	sm.nextIndex = make(map[int]int)
+	sm.matchIndex = make(map[int]int)
+	for i := 0;i<len(sm.serverIds);i++{
+		sm.nextIndex[sm.serverIds[i]] = 1
+		sm.matchIndex[sm.serverIds[i]] = 0
+	}	
+	z := sm.ProcessEvent(VoteReq{senderId:21,senderTerm:3,senderLastLogIndex:13,senderLastLogTerm:5})
+	var numSend int
+	var numLogStore int
+	var numAlarm int
+	var numStateStore int
+	var numCommit int
+	var incorrectAction int
+	for i := 0; i<len(z);i++ {
+		switch z[i].(type){
+		case Send:
+			a,_ := z[i].(Send)
+			_,ok := a.event.(VoteResp)
+			if ok{
+				numSend++
+			}else{
+				incorrectAction++
+			}
+		case LogStore:
+			numLogStore++
+		case Alarm:
+			numAlarm++
+		case StateStore:
+			numStateStore++
+		case Commit:
+			numCommit++
+		default:
+			incorrectAction++
+		}
+	}
+	expect(t,strconv.Itoa(numSend),"1")
+	expect(t,strconv.Itoa(numLogStore),"0")
+	expect(t,strconv.Itoa(numAlarm),"0")
+	expect(t,strconv.Itoa(numStateStore),"1")
+	expect(t,strconv.Itoa(numCommit),"0")
+	expect(t,strconv.Itoa(incorrectAction),"0")	
+}
+
+func TestVoteResp(t *testing.T){
+	var sm StateMachine
+	sm = StateMachine{currTerm: 3,serverIds: []int{5,13},selfid:34,timer:1000,currState:"follower"}
+	sm.clusterSize = len(sm.serverIds)+1
+	sm.log = make([]logEntry,20)
+	for i := 0;i<len(sm.log);i++{
+		sm.log[i].term = i+1
+		sm.log[i].command = []byte{'j','m','p'}
+	}
+	sm.lastLogIndex = 19
+	sm.nextIndex = make(map[int]int)
+	sm.matchIndex = make(map[int]int)
+	for i := 0;i<len(sm.serverIds);i++{
+		sm.nextIndex[sm.serverIds[i]] = 1
+		sm.matchIndex[sm.serverIds[i]] = 0
+	}
+	x := sm.ProcessEvent(Timeout{})	
+	y := sm.ProcessEvent(VoteResp{senderId:5,senderTerm:4,response:true})
+	z := append(x,y...)
+	var numSendAppendEntriesReq int
+	var numSendVoteReq int
+	var numLogStore int
+	var numAlarm int
+	var numStateStore int
+	var numCommit int
+	var incorrectAction int
+	for i := 0; i<len(z);i++ {
+		switch z[i].(type){
+		case Send:
+			a,_ := z[i].(Send)
+			_,ok1 := a.event.(AppendEntriesReq)
+			if ok1{
+				numSendAppendEntriesReq++
+			}else{
+				_,ok2 := a.event.(VoteReq)
+				if ok2{
+					numSendVoteReq++
+				}else{	
+				incorrectAction++
+				}
+			}
+		case LogStore:
+			numLogStore++
+		case Alarm:
+			numAlarm++
+		case StateStore:
+			numStateStore++
+		case Commit:
+			numCommit++
+		default:
+			incorrectAction++
+		}
+	}
+	expect(t,strconv.Itoa(numSendAppendEntriesReq),"2")
+	expect(t,strconv.Itoa(numSendVoteReq),"2")
+	expect(t,strconv.Itoa(numLogStore),"0")
+	expect(t,strconv.Itoa(numAlarm),"1")
+	expect(t,strconv.Itoa(numStateStore),"1")
+	expect(t,strconv.Itoa(numCommit),"0")
+	expect(t,strconv.Itoa(incorrectAction),"0")
+}
 // Useful testing function
 func expect(t *testing.T, a string, b string) {
         if a != b {
