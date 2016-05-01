@@ -85,7 +85,7 @@ func TestTimeout(t *testing.T){
 	}
 	expect(t,strconv.Itoa(numSend),"4")
 	expect(t,strconv.Itoa(numLogStore),"0")
-	expect(t,strconv.Itoa(numAlarm),"0")
+	expect(t,strconv.Itoa(numAlarm),"1")
 	expect(t,strconv.Itoa(numStateStore),"0")
 	expect(t,strconv.Itoa(numCommit),"0")
 	expect(t,strconv.Itoa(incorrectAction),"0")
@@ -260,7 +260,7 @@ func TestVoteReq(t *testing.T){
 	}
 	expect(t,strconv.Itoa(numSend),"1")
 	expect(t,strconv.Itoa(numLogStore),"0")
-	expect(t,strconv.Itoa(numAlarm),"0")
+	expect(t,strconv.Itoa(numAlarm),"1")
 	expect(t,strconv.Itoa(numStateStore),"2")
 	expect(t,strconv.Itoa(numCommit),"0")
 	expect(t,strconv.Itoa(incorrectAction),"0")	

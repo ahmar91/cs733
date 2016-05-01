@@ -200,6 +200,7 @@ func handleTimeout(sm *StateMachine) []Action{
 	if sm.currState == "leader" {
 		var alm Alarm
 		alm = Alarm{T:sm.heartbeatAlarmPeriod}
+		action = append(action,alm)		
 		for i := 0; i < len(sm.serverIds); i++ {
 			loc_prevLogIndex := sm.nextIndex[sm.serverIds[i]] - 1
 			var loc_prevLogTerm int
@@ -316,6 +317,7 @@ func handleAppendEntriesResp(sm *StateMachine, cmd *AppendEntriesResp) []Action{
 			sm.lastRepIndex = -1
 			var alm Alarm
 			alm = Alarm{randRange(lb * sm.electionAlarmPeriod, ub * sm.electionAlarmPeriod)}
+			action = append(action,alm)		
 			sm.hasVoted = make(map[int]int)
 			var ststr StateStore
 			ststr = StateStore{CurrTerm:sm.currTerm,VotedFor:sm.votedFor,LastRepIndex:sm.lastRepIndex}
@@ -409,7 +411,8 @@ func handleVoteReq(sm *StateMachine, cmd *VoteReq) []Action{
 			return action		
 		}
 		var alm Alarm
-		alm = Alarm{randRange(lb * sm.electionAlarmPeriod, ub * sm.electionAlarmPeriod)}		
+		alm = Alarm{randRange(lb * sm.electionAlarmPeriod, ub * sm.electionAlarmPeriod)}
+		action = append(action,alm)				
 		sm.votedFor = cmd.SenderId
 		sm.hasVoted = make(map[int]int)
 		sm.hasVoted[cmd.SenderId] = 1		
@@ -426,7 +429,8 @@ func handleVoteReq(sm *StateMachine, cmd *VoteReq) []Action{
 			sm.lastRepIndex = -1
 			sm.votedFor = -1
 			var alm Alarm
-			alm = Alarm{randRange(lb * sm.electionAlarmPeriod, ub * sm.electionAlarmPeriod)}		
+			alm = Alarm{randRange(lb * sm.electionAlarmPeriod, ub * sm.electionAlarmPeriod)}
+			action = append(action,alm)		
 			sm.hasVoted = make(map[int]int)
 			var ststr StateStore
 			ststr = StateStore{CurrTerm:sm.currTerm,VotedFor:sm.votedFor,LastRepIndex:sm.lastRepIndex}
@@ -529,6 +533,7 @@ func handleVoteResp(sm *StateMachine, cmd *VoteResp) []Action{
 					sm.currState = "follower"
 					var alm Alarm
 					alm = Alarm{randRange(lb * sm.electionAlarmPeriod, ub * sm.electionAlarmPeriod)}
+					action = append(action,alm)		
 				}			
 			}
 		}
