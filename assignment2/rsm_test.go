@@ -40,7 +40,7 @@ func TestAppend(t *testing.T){
 
 func TestTimeout(t *testing.T){
 	var sm StateMachine
-	sm = StateMachine{currTerm: 4,serverIds: []int{5,13,21,55},selfId:34,timer:1000,currState:"leader"}
+	sm = StateMachine{currTerm: 4,serverIds: []int{5,13,21,55},selfId:34,electionAlarmPeriod:1000,currState:"leader"}
 	sm.clusterSize = len(sm.serverIds)+1
 	sm.log = make([]LogEntry,20)
 	for i := 0;i<len(sm.log);i++{
@@ -93,7 +93,7 @@ func TestTimeout(t *testing.T){
 
 func TestAppendEntriesReq(t *testing.T){
 	var sm StateMachine
-	sm = StateMachine{currTerm: 2,serverIds: []int{5,13,21,55},selfId:34,timer:1000,currState:"follower",electionAlarmPeriod:5,heartbeatAlarmPeriod:4}
+	sm = StateMachine{currTerm: 2,serverIds: []int{5,13,21,55},selfId:34,currState:"follower",electionAlarmPeriod:5,heartbeatAlarmPeriod:4}
 	sm.clusterSize = len(sm.serverIds)+1
 	sm.log = make([]LogEntry,10)
 	for i := 0;i<len(sm.log);i++{
@@ -155,7 +155,7 @@ func TestAppendEntriesReq(t *testing.T){
 
 func TestAppendEntriesResp(t *testing.T){
 	var sm StateMachine
-	sm = StateMachine{currTerm: 4,serverIds: []int{5,13,21,55},selfId:34,timer:1000,currState:"leader",electionAlarmPeriod:5,heartbeatAlarmPeriod:4}
+	sm = StateMachine{currTerm: 4,serverIds: []int{5,13,21,55},selfId:34,currState:"leader",electionAlarmPeriod:5,heartbeatAlarmPeriod:4}
 	sm.clusterSize = len(sm.serverIds)+1
 	sm.log = make([]LogEntry,20)
 	for i := 0;i<len(sm.log);i++{
@@ -213,7 +213,7 @@ func TestAppendEntriesResp(t *testing.T){
 
 func TestVoteReq(t *testing.T){
 	var sm StateMachine
-	sm = StateMachine{currTerm: 2,serverIds: []int{5,13,21,55},selfId:34,timer:1000,currState:"follower",electionAlarmPeriod:5,heartbeatAlarmPeriod:4}
+	sm = StateMachine{currTerm: 2,serverIds: []int{5,13,21,55},selfId:34,currState:"follower",electionAlarmPeriod:5,heartbeatAlarmPeriod:4}
 	sm.clusterSize = len(sm.serverIds)+1
 	sm.log = make([]LogEntry,20)
 	for i := 0;i<len(sm.log);i++{
@@ -268,7 +268,7 @@ func TestVoteReq(t *testing.T){
 
 func TestVoteResp(t *testing.T){
 	var sm StateMachine
-	sm = StateMachine{currTerm: 3,serverIds: []int{5,13},selfId:34,timer:1000,currState:"follower",electionAlarmPeriod:5,heartbeatAlarmPeriod:4}
+	sm = StateMachine{currTerm: 3,serverIds: []int{5,13},selfId:34,currState:"follower",electionAlarmPeriod:5,heartbeatAlarmPeriod:4}
 	sm.clusterSize = len(sm.serverIds)+1
 	sm.log = make([]LogEntry,20)
 	for i := 0;i<len(sm.log);i++{

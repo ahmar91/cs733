@@ -23,7 +23,6 @@ type StateMachine struct {
 	serverIds []int // other server Ids
 	selfId int // server Id
 	clusterSize int
-	timer int
 	currState string
 	lastLogIndex int64
 	lastLogTerm int
